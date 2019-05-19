@@ -22,7 +22,7 @@ function start() {
                 {
                     name: "productList",
                     type: "list",
-                    message: "Welcome to Bamazon! We are not the ghetto Amazon... Please select the ID of what you would like to buy.",
+                    message: "Welcome to Bamazon! We are not the ghetto Amazon... You may press 'ctrl + c' at any point to leave the store. Please select the ID of what you would like to buy? ",
                     choices: function () {
                         var productsArray = [];
                         for (var i = 0; i < results.length; i++) {
@@ -55,10 +55,35 @@ function start() {
                                     {
                                         name: "confirmPurchase",
                                         type: "list",
-                                        message: "Your total is $" + chosenProduct.price * purchasingQuantity + ". Do you confirm your purchase? Select 'Exit' to cancel your purchase and be brought back to the product list.",
+                                        message: "Your total is $" + parseFloat(chosenProduct.price * purchasingQuantity) + ". Do you confirm your purchase? Select 'Exit' to cancel your purchase and be brought back to the product list.",
                                         choices: ["Confirm", "Exit"]
                                     }
                                 ])
+                                .then(function (confirmation){
+                                    if (confirmation.confirmPurchase === "Confirm") {
+                                        var newQuantity = chosenProduct.stock_quantity - purchasingQuantity;
+                                        connection.query(
+                                            "UPDATE products SET ? WHERE ?",
+                                            [
+                                                {
+                                                    stock_quantity: newQuantity
+                                                },
+                                                {
+                                                    item_id: chosenProduct.item_id
+                                                }
+                                            ],                                             
+                                            function(error) {
+                                                if (error) throw err;
+                                                console.log("Item(s) purchased! Returning to product list. \n-----------------------------------------------\n");
+                                                start();
+                                            }
+                                        );
+                                    }
+                                    else {
+                                        console.log("\n-----------------------------------------------\n")
+                                        start();
+                                    }
+                                });
                         }
                         else if ((chosenProduct.stock_quantity < purchasingQuantity)) {
                             console.log("There are not enough " + chosenProduct.product_name + "'s to fulfill your order. Sorry! Returning to product list. \n-----------------------------------------------\n")
