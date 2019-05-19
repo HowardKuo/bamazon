@@ -1,6 +1,6 @@
-DROP DATABASE IF EXISTS bamazaon_DB;
-CREATE DATABASE bamazaon_DB;
-USE bamazaon_DB;
+DROP DATABASE IF EXISTS bamazan_DB;
+CREATE DATABASE bamazon_DB;
+USE bamazon_DB;
 
 CREATE TABLE products(
     item_id INTEGER(255) AUTO_INCREMENT NOT NULL,
