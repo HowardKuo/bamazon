@@ -20,8 +20,8 @@ function start() {
         inquirer
             .prompt([
                 {
-                    name: "welcomeList",
-                    type: "rawlist",
+                    name: "productList",
+                    type: "list",
                     message: "Welcome to Bamazon! We are not the ghetto Amazon... Please select the ID of what you would like to buy.",
                     choices: function () {
                         var productsArray = [];
@@ -29,9 +29,47 @@ function start() {
                             productsArray.push(results[i].product_name);
                         }
                         return productsArray;
+                    },
+                }
+            ])
+            .then(function (answer) {
+                var chosenProduct;
+                for (var i = 0; i < results.length; i++) {
+                    if (results[i].product_name === answer.productList) {
+                        chosenProduct = results[i];
                     }
-                },
-                
-        ]);
+                }
+                inquirer
+                    .prompt([
+                        {
+                            name: "purchaseQuantity",
+                            type: "input",
+                            message: "There are " + chosenProduct.stock_quantity + " " + chosenProduct.product_name + "(s) in stock. Each " + chosenProduct.product_name + " costs $" + chosenProduct.price + ". How many would you like to buy?"
+                        }
+                    ])
+                    .then(function (quantity) {
+                        var purchasingQuantity = parseInt(quantity.purchaseQuantity)
+                        if (chosenProduct.stock_quantity >= purchasingQuantity) {
+                            inquirer
+                                .prompt([
+                                    {
+                                        name: "confirmPurchase",
+                                        type: "list",
+                                        message: "Your total is $" + chosenProduct.price * purchasingQuantity + ". Do you confirm your purchase? Select 'Exit' to cancel your purchase and be brought back to the product list.",
+                                        choices: ["Confirm", "Exit"]
+                                    }
+                                ])
+                        }
+                        else if ((chosenProduct.stock_quantity < purchasingQuantity)) {
+                            console.log("There are not enough " + chosenProduct.product_name + "'s to fulfill your order. Sorry! Returning to product list. \n-----------------------------------------------\n")
+                            start();
+                        }
+                        else{
+                            console.log("There was an error with your order. Returning to product list. \n-----------------------------------------------\n");
+                            start();
+                        }
+                    });
+            });
+
     });
 }
